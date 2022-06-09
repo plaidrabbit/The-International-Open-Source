@@ -185,7 +185,6 @@ export class Claimer extends Creep {
 creepClasses.claimer = Claimer
 
 export class Vanguard extends Creep {
-
      /**
       *
       */
@@ -208,5 +207,19 @@ export class Antifa extends Creep {
      }
 }
 creepClasses.antifa = Antifa
+
+export class DepositHarvester extends Creep {
+     constructor(creepID: Id<Creep>) {
+          super(creepID)
+     }
+}
+creepClasses.depositHarvester = DepositHarvester
+
+export class DepositHauler extends Creep {
+     constructor(creepID: Id<Creep>) {
+          super(creepID)
+     }
+}
+creepClasses.depositHauler = DepositHauler
 
 export { creepClasses }

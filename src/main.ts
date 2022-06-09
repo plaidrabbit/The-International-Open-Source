@@ -71,7 +71,6 @@ declare global {
 
      type RemoteStampTypes = 'road' | 'container'
 
-
      type StampTypes =
           | 'fastFiller'
           | 'hub'
@@ -123,6 +122,8 @@ declare global {
           | 'claimer'
           | 'vanguard'
           | 'antifa'
+          | 'depositHarvester'
+          | 'depositHauler'
 
      type RoomObjectName =
           | 'terrainCM'

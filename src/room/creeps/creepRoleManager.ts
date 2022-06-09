@@ -20,6 +20,8 @@ import { remoteReserverManager } from './roleManagers/remote/remoteReserverManag
 import { remoteDefenderManager } from './roleManagers/remote/remoteDefenderManager'
 import { vanguardManager } from './roleManagers/international/vanguardManager'
 import { sourceHarvesterManager } from './roleManagers/commune/sourceHarvesterManager'
+import { depositHarvesterManager } from './roleManagers/remote/depositHarvesterManager'
+import { depositHaulerManager } from './roleManagers/remote/depositHaulerManager'
 import { remoteCoreAttackerManager } from './roleManagers/remote/remoteCoreAttackerManager'
 
 // Construct managers
@@ -45,6 +47,8 @@ const managers: Record<CreepRoles, Function> = {
      claimer: claimerManager,
      vanguard: vanguardManager,
      antifa: antifaManager,
+     depositHarvester: depositHarvesterManager,
+     depositHauler: depositHaulerManager,
 }
 
 export function creepRoleManager(room: Room) {
