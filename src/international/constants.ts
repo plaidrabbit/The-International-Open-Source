@@ -1,7 +1,7 @@
 /**
  * Increment by 1 when a change has been made that will break previous versions of the bot
  */
- export const breakingVersion = 23
+export const breakingVersion = 23
 
 // Settings
 
@@ -13,7 +13,7 @@ export const roomVisuals = false
 /**
  * Default value, do not change. Modify this property in Memory instead
  */
- export const baseVisuals = false
+export const baseVisuals = false
 
 /**
  * Default value, do not change. Modify this property in Memory instead

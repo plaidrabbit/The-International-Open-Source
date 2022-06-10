@@ -1,3 +1,4 @@
+import { DepositHauler } from '../creeps/creepClasses'
 import {
      allyList,
      builderSpawningWhenStorageThreshold,
@@ -5,6 +6,7 @@ import {
      constants,
      controllerDowngradeUpgraderNeed,
      remoteNeedsIndex,
+     depositNeedsIndex,
      upgraderSpawningWhenStorageThreshold,
 } from 'international/constants'
 import {
@@ -13,6 +15,7 @@ import {
      findRemoteSourcesByEfficacy,
      findStrengthOfParts,
      getRange,
+     unpackAsRoomPos,
 } from 'international/generalFunctions'
 
 /**
@@ -851,10 +854,9 @@ export function spawnRequester(room: Room) {
 
      constructSpawnRequests(
           (function (): SpawnRequestOpts | false {
+               const priority = 7 + room.creepsFromRoom.maintainer.length
 
-            const priority = 7 + room.creepsFromRoom.maintainer.length
-
-            // Get roads
+               // Get roads
 
                const roads: (StructureRoad | StructureContainer)[] = room.get('road')
                // Get containers
@@ -1440,6 +1442,84 @@ export function spawnRequester(room: Room) {
                          priority: 8.1 + room.creepsFromRoom.vanguard.length,
                          memoryAdditions: {
                               role: 'vanguard',
+                         },
+                    }
+               })(),
+          )
+     }
+
+     const deposits = room.memory.deposits
+     for (const depositRoomName of Object.keys(deposits)) {
+          const deposit = deposits[depositRoomName]
+          const remoteNeeds = deposit.needs
+          // Add up econ needs for this room
+
+          const remoteNeed =
+               Math.max(remoteNeeds[depositNeedsIndex.depositHarvester], 0) +
+               Math.max(remoteNeeds[depositNeedsIndex.depositHauler], 0)
+
+          // If there is a need for any econ creep, inform the index
+
+          if (remoteNeed <= 0) continue
+
+          // Construct requests for deposit harvesters
+
+          constructSpawnRequests(
+               (function (): SpawnRequestOpts | false {
+                    if (remoteNeeds[depositNeedsIndex.depositHarvester] <= 0) return false
+
+                    if (spawnEnergyCapacity >= 950) {
+                         return {
+                              defaultParts: [MOVE, WORK],
+                              extraParts: [WORK, MOVE],
+                              partsMultiplier: 10,
+                              minCreeps: undefined,
+                              maxCreeps: 1,
+                              minCost: 300,
+                              priority: 7,
+                              memoryAdditions: {
+                                   role: 'depositHarvester',
+                              },
+                         }
+                    }
+
+                    return {
+                         defaultParts: [MOVE, WORK],
+                         extraParts: [WORK, MOVE],
+                         partsMultiplier: 10,
+                         minCreeps: undefined,
+                         maxCreeps: 1,
+                         minCost: 300,
+                         priority: 7,
+                         memoryAdditions: {
+                              role: 'depositHarvester',
+                         },
+                    }
+               })(),
+          )
+          // Construct requests for deposit hauler
+
+          constructSpawnRequests(
+               (function (): SpawnRequestOpts | false {
+                    // Construct the required carry parts
+
+                    let partsMultiplier = Math.max(remoteNeeds[depositNeedsIndex.depositHauler], 0)
+
+                    if (remoteNeeds[depositNeedsIndex.depositHauler] <= 0) return false
+
+                    const priority = 7 + room.creepsFromRoom.DepositHauler.length * 1.5
+
+                    return {
+                         defaultParts: [],
+                         extraParts: [CARRY, MOVE],
+                         threshold: 0.1,
+                         partsMultiplier,
+                         minCreeps: undefined,
+                         maxCreeps: Infinity,
+                         minCost: 200,
+                         priority,
+                         memoryAdditions: {
+                              role: 'depositHauler',
                          },
                     }
                })(),

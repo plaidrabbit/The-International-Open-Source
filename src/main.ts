@@ -846,6 +846,7 @@ declare global {
 
      interface DepositRecord {
           decay: number
+          id: Id<Deposit>
           needs: number[]
      }
 
@@ -939,7 +940,7 @@ declare global {
 
           powerBanks: { [roomName: string]: number[] }
 
-          deposits: Record<Id<Deposit>, DepositRecord>
+          deposits: Record<string, DepositRecord>
 
           /**
            * Wether or not commune planning has been completed for the room
