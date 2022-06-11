@@ -399,6 +399,11 @@ declare global {
           me: string
 
           /**
+           * If shard logs should be logged
+           */
+          isMainShard: boolean
+
+          /**
            * The current breaking version of the bot
            */
           breakingVersion: number | undefined
