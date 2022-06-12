@@ -1136,12 +1136,17 @@ export function spawnRequester(room: Room) {
 
      const remoteNamesByEfficacy: string[] = room.get('remoteNamesByEfficacy')
 
+     let remoteName
+     let remoteNeeds
+     let remoteNeed
+     let sourcesByEfficacy
+
      for (let index = 0; index < remoteNamesByEfficacy.length; index += 1) {
-          const remoteName = remoteNamesByEfficacy[index]
-          const remoteNeeds = Memory.rooms[remoteName].needs
+          remoteName = remoteNamesByEfficacy[index]
+          remoteNeeds = Memory.rooms[remoteName].needs
           // Add up econ needs for this room
 
-          const remoteNeed =
+          remoteNeed =
                Math.max(remoteNeeds[remoteNeedsIndex.source1RemoteHarvester], 0) +
                Math.max(remoteNeeds[remoteNeedsIndex.source2RemoteHarvester], 0) +
                Math.max(remoteNeeds[remoteNeedsIndex.remoteHauler], 0) +
@@ -1155,7 +1160,7 @@ export function spawnRequester(room: Room) {
 
           // Get the sources in order of efficacy
 
-          const sourcesByEfficacy = findRemoteSourcesByEfficacy(remoteName)
+          sourcesByEfficacy = findRemoteSourcesByEfficacy(remoteName)
 
           // Construct requests for source1RemoteHarvesters
 
@@ -1449,34 +1454,40 @@ export function spawnRequester(room: Room) {
      }
 
      const deposits = room.memory.deposits
-     for (const depositRoomName of Object.keys(deposits)) {
-          const deposit = deposits[depositRoomName]
-          const remoteNeeds = deposit.needs
+
+     let depositRecord
+     let depositNeeds
+     let depositNeed
+
+     for (const depositRoomName in deposits) {
+          depositRecord = deposits[depositRoomName]
+          depositNeeds = depositRecord.needs
           // Add up econ needs for this room
 
-          const remoteNeed =
-               Math.max(remoteNeeds[depositNeedsIndex.depositHarvester], 0) +
-               Math.max(remoteNeeds[depositNeedsIndex.depositHauler], 0)
+          depositNeed =
+               Math.max(depositNeeds[depositNeedsIndex.depositHarvester], 0) +
+               Math.max(depositNeeds[depositNeedsIndex.depositHauler], 0)
 
           // If there is a need for any econ creep, inform the index
 
-          if (remoteNeed <= 0) continue
+          if (depositNeed <= 0) continue
 
           // Construct requests for deposit harvesters
 
           constructSpawnRequests(
                (function (): SpawnRequestOpts | false {
-                    if (remoteNeeds[depositNeedsIndex.depositHarvester] <= 0) return false
+                    if (depositNeeds[depositNeedsIndex.depositHarvester] <= 0) return false
+
+                    const priority = 7
 
                     if (spawnEnergyCapacity >= 950) {
                          return {
-                              defaultParts: [MOVE, WORK],
+                              defaultParts: [CARRY],
                               extraParts: [WORK, MOVE],
-                              partsMultiplier: 10,
-                              minCreeps: undefined,
+                              partsMultiplier: 24,
                               maxCreeps: 1,
-                              minCost: 300,
-                              priority: 7,
+                              minCost: 800,
+                              priority,
                               memoryAdditions: {
                                    role: 'depositHarvester',
                               },
@@ -1484,13 +1495,12 @@ export function spawnRequester(room: Room) {
                     }
 
                     return {
-                         defaultParts: [MOVE, WORK],
-                         extraParts: [WORK, MOVE],
-                         partsMultiplier: 10,
-                         minCreeps: undefined,
+                        defaultParts: [CARRY],
+                        extraParts: [WORK, MOVE],
+                         partsMultiplier: 24,
                          maxCreeps: 1,
-                         minCost: 300,
-                         priority: 7,
+                         minCost: 800,
+                         priority,
                          memoryAdditions: {
                               role: 'depositHarvester',
                          },
@@ -1503,20 +1513,19 @@ export function spawnRequester(room: Room) {
                (function (): SpawnRequestOpts | false {
                     // Construct the required carry parts
 
-                    let partsMultiplier = Math.max(remoteNeeds[depositNeedsIndex.depositHauler], 0)
+                    let partsMultiplier = Math.max(depositNeeds[depositNeedsIndex.depositHauler], 0)
 
-                    if (remoteNeeds[depositNeedsIndex.depositHauler] <= 0) return false
+                    if (depositNeeds[depositNeedsIndex.depositHauler] <= 0) return false
 
-                    const priority = 7 + room.creepsFromRoom.DepositHauler.length * 1.5
+                    const priority = 7.1
 
                     return {
                          defaultParts: [],
                          extraParts: [CARRY, MOVE],
-                         threshold: 0.1,
                          partsMultiplier,
                          minCreeps: undefined,
                          maxCreeps: Infinity,
-                         minCost: 200,
+                         minCost: 300,
                          priority,
                          memoryAdditions: {
                               role: 'depositHauler',
