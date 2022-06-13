@@ -369,6 +369,8 @@ Room.prototype.get = function (roomObjectName) {
 
           return room.anchor.findClosestByPath(harvestPositions, {
                ignoreCreeps: true,
+               ignoreDestructibleStructures: true,
+               ignoreRoads: true,
           })
      }
 
@@ -797,6 +799,8 @@ Room.prototype.get = function (roomObjectName) {
                pack(
                     hubAnchor.findClosestByPath(upgradePositions, {
                          ignoreCreeps: true,
+                         ignoreDestructibleStructures: true,
+                         ignoreRoads: true,
                     }),
                ),
           )
@@ -1579,6 +1583,8 @@ Room.prototype.advancedFindPath = function (opts: PathOpts): RoomPosition[] {
                               const upgradePositions: RoomPosition[] = room.get('upgradePositions')
                               const deliverUpgradePos = room.anchor.findClosestByPath(upgradePositions, {
                                    ignoreCreeps: true,
+                                   ignoreDestructibleStructures: true,
+                                   ignoreRoads: true,
                               })
 
                               // Loop through each pos of upgradePositions, assigning them as prefer to avoid in the cost matrix
@@ -1842,9 +1848,11 @@ Room.prototype.findType = function (scoutingRoom: Room) {
 Room.prototype.makeRemote = function (scoutingRoom) {
      const room = this
 
+     let distance = Game.map.getRoomLinearDistance(scoutingRoom.name, room.name)
+
      // Find distance from scoutingRoom
 
-     const distanceFromScoutingRoom = advancedFindDistance(scoutingRoom.name, room.name, {
+     if (distance < 4) distance = advancedFindDistance(scoutingRoom.name, room.name, {
           keeper: Infinity,
           enemy: Infinity,
           enemyRemote: Infinity,
@@ -1853,7 +1861,7 @@ Room.prototype.makeRemote = function (scoutingRoom) {
           highway: Infinity,
      })
 
-     if (distanceFromScoutingRoom < 4) {
+     if (distance < 4) {
           // If the room is already a remote of the scoutingRoom
 
           if (room.memory.type === 'remote' && scoutingRoom.name === room.memory.commune) return true
@@ -2494,7 +2502,11 @@ Room.prototype.findCSiteTargetID = function (creep) {
 
           // Record the closest site to the anchor in the room's global and inform true
 
-          room.memory.cSiteTargetID = anchor.findClosestByRange(cSitesOfType).id
+          room.memory.cSiteTargetID = anchor.findClosestByPath(cSitesOfType, {
+               ignoreCreeps: true,
+               ignoreDestructibleStructures: true,
+               ignoreRoads: true,
+          }).id
           return true
      }
 
