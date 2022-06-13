@@ -10,26 +10,41 @@ Room.prototype.claimRequestManager = function () {
      // If there is an existing claimRequest and it's valid, check if there is claimer need
 
      if (this.memory.claimRequest) {
-          Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguard] = 20
+          if (Memory.claimRequests[this.memory.claimRequest].abadon > 0) {
+               delete this.memory.claimRequest
+               return
+          }
 
           const claimTarget = Game.rooms[this.memory.claimRequest]
-          if (!claimTarget) {
+          if (!claimTarget || !claimTarget.controller.my) {
                Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.claimer] += 1
                return
           }
 
-          // If the room is claimed and there are spawns, delete the claimRequest
+          // If there is a spawn and the controller is above level 5
 
-          if (claimTarget.controller.my && claimTarget.structures.spawn.length) {
+          if (claimTarget.structures.spawn.length && claimTarget.controller.level >= 5) {
                delete Memory.claimRequests[this.memory.claimRequest]
                delete this.memory.claimRequest
 
                return
           }
 
-          if (claimTarget.controller.my) return
+          if (!claimTarget.structures.spawn.length) Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguard] = 20
 
-          Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.claimer] += 1
+          Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguardDefender] = 0
+
+          if (claimTarget.enemyCreeps.length) {
+               // Get enemyCreeps in the room and loop through them
+
+               for (const enemyCreep of claimTarget.enemyCreeps) {
+                    // Increase the defenderNeed according to the creep's strength
+
+                    Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguardDefender] +=
+                         enemyCreep.strength
+               }
+          }
+
           return
      }
 
@@ -49,8 +64,12 @@ Room.prototype.claimRequestManager = function () {
 
      if (this.energyCapacityAvailable < 750) return
 
+     let distance
+
      for (const roomName of internationalManager.findClaimRequestsByScore()) {
-          const distance = advancedFindDistance(this.name, roomName, {
+          if (Memory.claimRequests[roomName].abadon > 0) continue
+
+          distance = advancedFindDistance(this.name, roomName, {
                keeper: Infinity,
                enemy: Infinity,
                enemyRemote: Infinity,

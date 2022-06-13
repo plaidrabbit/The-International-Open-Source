@@ -11,7 +11,7 @@ export default class GetShardVision {
           const spawnShardFlag = Game.flags[this._shardNames[0]]
           if (!spawnShardFlag) return
 
-          let headSpawn: StructureSpawn = Game.spawns['Spawn1']
+          let headSpawn: StructureSpawn = Game.spawns['Spawn2']
           if (!headSpawn) return
 
           const shardTarget =
@@ -42,7 +42,10 @@ export default class GetShardVision {
 
                const creeps = Object.values(Game.creeps).filter(c => c.name.includes(shardName))
                creeps.forEach(creep => {
-                    creep.notifyWhenAttacked(false)
+                    if (creep.memory.notifiesWhenAttacked === undefined || creep.memory.notifiesWhenAttacked === true) {
+                         creep.notifyWhenAttacked(false)
+                         creep.memory.notifiesWhenAttacked = false
+                    }
                     // * If main shard isn't shard3 or shard0
                     // * Ask PandaMaster to modify this code!
                     // if (Game.shard.name === this._mainShard && shardName === this._mainShard) {

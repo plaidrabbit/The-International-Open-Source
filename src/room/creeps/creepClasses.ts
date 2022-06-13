@@ -40,7 +40,7 @@ creepClasses.builder = Builder
 export class Maintainer extends Creep {
      advancedMaintain?(): boolean
 
-     maintainAtFeet?(): boolean
+     maintainNearby?(): boolean
 
      constructor(creepID: Id<Creep>) {
           super(creepID)
@@ -128,12 +128,10 @@ export class RemoteDefender extends Creep {
       */
      findRemote?(): boolean
 
-     advancedHeal?(): boolean
-
      /**
-      * Find and attack enemyAttackers
+      * Find and attack enemyCreeps
       */
-     advancedAttackAttackers?(): boolean
+     advancedAttackEnemies?(): boolean
 
      constructor(creepID: Id<Creep>) {
           super(creepID)
@@ -159,6 +157,11 @@ export class RemoteCoreAttacker extends Creep {
 creepClasses.remoteCoreAttacker = RemoteCoreAttacker
 
 export class Scout extends Creep {
+     /**
+      * If the creep sends notifications to the mail when its attacked
+      */
+     notifiesWhenAttacked?: boolean
+
      /**
       * Finds a room name for the scout to target
       */
@@ -200,6 +203,18 @@ export class Vanguard extends Creep {
      }
 }
 creepClasses.vanguard = Vanguard
+
+export class VanguardDefender extends Creep {
+     /**
+      * Find and attack enemyCreeps
+      */
+     advancedAttackEnemies?(): boolean
+
+     constructor(creepID: Id<Creep>) {
+          super(creepID)
+     }
+}
+creepClasses.vanguardDefender = VanguardDefender
 
 export class Antifa extends Creep {
      constructor(creepID: Id<Creep>) {

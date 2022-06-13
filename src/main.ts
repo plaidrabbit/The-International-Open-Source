@@ -121,6 +121,7 @@ declare global {
           | 'scout'
           | 'claimer'
           | 'vanguard'
+          | 'vanguardDefender'
           | 'antifa'
           | 'depositHarvester'
           | 'depositHauler'
@@ -289,6 +290,12 @@ declare global {
           amount: number
           resourceType: ResourceConstant
           targetID: Id<AnyStoreStructure | Creep | Tombstone | Resource>
+     }
+
+     interface ClaimRequest {
+          needs: number[]
+          score: number
+          abadon?: number
      }
 
      interface Stats {
@@ -476,7 +483,7 @@ declare global {
           /**
            *
            */
-          claimRequests: { [key: string]: { needs: number[]; score: number } }
+          claimRequests: { [key: string]: ClaimRequest }
 
           attackRequests: { [key: string]: { needs: number[] } }
 
@@ -820,6 +827,10 @@ declare global {
 
           readonly enemyAttackers: Creep[]
 
+          _allyCreeps: Creep[]
+
+          readonly allyCreeps: Creep[]
+
           _structures: Partial<OrganizedStructures>
 
           readonly structures: OrganizedStructures
@@ -1000,11 +1011,6 @@ declare global {
            */
           pathOpts: PathOpts
 
-          /**
-           * A numerical measurement of the combat abilites of the creep
-           */
-          strength: number
-
           healStrength: number
 
           /**
@@ -1162,11 +1168,13 @@ declare global {
 
           advancedReserveController(): boolean
 
-          findStrength(): number
-
           findHealStrength(): number
 
           findCost(): number
+
+          passiveHeal(): boolean
+
+          aggressiveHeal(): boolean
 
           // Reservation
 
@@ -1175,6 +1183,13 @@ declare global {
           createReservation(): void
 
           // Getters
+
+          _strength: number
+
+          /**
+           * A numerical measurement of the combat abilites of the creep
+           */
+          readonly strength: number
 
           _reservation: Reservation | false
 
