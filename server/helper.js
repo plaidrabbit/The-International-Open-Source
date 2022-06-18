@@ -225,11 +225,11 @@ module.exports.logConsole = logConsole;
  */
 const spawnBots = async function (line, socket, rooms, players, tickDuration) {
   if (line.startsWith(`Screeps server v`)) {
-    console.log(`> system.resetAllData()`);
-    socket.write(`system.resetAllData()\r\n`);
-    await sleep(5);
     console.log(`> system.pauseSimulation()`);
     socket.write(`system.pauseSimulation()\r\n`);
+    await sleep(5);
+    console.log(`> system.resetAllData()`);
+    socket.write(`system.resetAllData()\r\n`);
     await sleep(5);
     console.log(`> system.setTickDuration(${tickDuration})`);
     socket.write(`system.setTickDuration(${tickDuration})\r\n`);
@@ -255,14 +255,10 @@ const spawnBots = async function (line, socket, rooms, players, tickDuration) {
     for (const room of rooms) {
       console.log(`> Spawn bot ${room} as Carson AI`);
       socket.write(
-        `bots.spawn('my-bot', '${room}', {username: '${room}', gcl: 2})\r\n`
+        `bots.spawn('my-bot', '${room}', {username: '${room}', gcl: 1,cpu: 500,auto:true})\r\n`
       );
       await sleep(5);
-      socket.write(
-        `storage.db['users'].update({ username: '${room}' },{ $set: { cpu: 300 }})\r\n`
-      );
-      await sleep(5);
-    }
+      }
     return true;
   }
   return false;
