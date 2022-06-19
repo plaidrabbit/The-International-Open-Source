@@ -493,10 +493,6 @@ declare global {
           communes: string[]
 
           stats: Partial<Stats>
-          /**
-           * Deposit relationship table
-          */
-          depositRelations: { [key: string]: { [key: string]: number } }
      }
 
      interface RawMemory {

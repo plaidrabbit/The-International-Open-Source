@@ -30,8 +30,7 @@ Room.prototype.claimRequestManager = function () {
                return
           }
 
-          if (!claimTarget.structures.spawn.length)
-               Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguard] = 20
+          if (!claimTarget.structures.spawn.length) Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguard] = 20
 
           Memory.claimRequests[this.memory.claimRequest].needs[claimRequestNeedsIndex.vanguardDefender] = 0
 

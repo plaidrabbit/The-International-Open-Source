@@ -64,7 +64,8 @@ Scout.prototype.recordDeposits = function () {
      const { room } = this
 
      if (room.memory.type != 'highway') return
-     if (Memory.depositRelations[room.name]) return
+
+     // Make sure the room has a commune
 
      if (room.memory.commune) {
           if (!Memory.communes.includes(room.memory.commune)) {
@@ -80,16 +81,14 @@ Scout.prototype.recordDeposits = function () {
 
      // Filter deposits that haven't been assigned a commune and are viable
 
-     const unAssignedDeposits = deposits.filter(function (deposit) {
+     const unAssignedDeposits = deposits.filter(function(deposit) {
           return !communeMemory[deposit.id] && deposit.lastCooldown <= 100 && deposit.ticksToDecay > 500
      })
 
-     for (const deposit of unAssignedDeposits) {
-          Memory.depositRelations[room.name] = room.memory.communeName
+     for (const deposit of unAssignedDeposits)
           communeMemory.deposits[deposit.id] = {
                id: deposit.id,
                decay: deposit.ticksToDecay,
                needs: [1, 1],
           }
-     }
 }
