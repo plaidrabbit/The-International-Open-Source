@@ -169,16 +169,11 @@ Creep.prototype.advancedHarvestSource = function (source) {
 Creep.prototype.advancedUpgradeController = function () {
      const { room } = this
 
-     // The the controller
-
-     const { controller } = room
-
      // Assign either the controllerLink or controllerContainer as the controllerStructure
 
-     const controllerStructure: StructureLink | StructureContainer | undefined =
-          room.get('controllerLink') || room.get('controllerContainer')
+     let controllerStructure: StructureLink | StructureContainer | undefined = room.get('controllerContainer')
 
-     this.say('AUC')
+     if (!controllerStructure && room.get('hubLink')) controllerStructure = room.get('controllerLink')
 
      // If there is a controllerContainer
 
@@ -216,43 +211,18 @@ Creep.prototype.advancedUpgradeController = function () {
                }
           }
 
-          const upgradeControllerResult = this.upgradeController(controller)
+          if (!this.memory.packedPos) return false
 
-          const workPartCount = this.partsOfType(WORK)
+          let say = ``
 
-          let controlPoints = 0
+          const upgradePos = unpackAsRoomPos(this.memory.packedPos, room.name)
+          const upgradePosRange = getRange(this.pos.x - upgradePos.x, this.pos.y - upgradePos.y)
 
-          // Try to upgrade the controller, and if the result is a success
-
-          if (upgradeControllerResult === OK) {
-               this.say('UC')
-
-               controlPoints = Math.min(this.store.energy, this.partsOfType(WORK))
-               this.store.energy -= workPartCount
-          }
-
-          // If packedUpgradePos is out of range
-
-          if (
-               getRangeBetween(
-                    this.pos.x,
-                    this.pos.y,
-                    Math.floor(this.memory.packedPos / constants.roomDimensions),
-                    Math.floor(this.memory.packedPos % constants.roomDimensions),
-               ) > 0
-          ) {
-               this.say('➡️🔋')
-
-               // Make a move request to it
-
+          if (upgradePosRange > 0) {
                this.createMoveRequest({
                     origin: this.pos,
                     goal: {
-                         pos: new RoomPosition(
-                              Math.floor(this.memory.packedPos / constants.roomDimensions),
-                              Math.floor(this.memory.packedPos % constants.roomDimensions),
-                              room.name,
-                         ),
+                         pos: upgradePos,
                          range: 0,
                     },
                     avoidEnemyRanges: true,
@@ -261,70 +231,68 @@ Creep.prototype.advancedUpgradeController = function () {
                     },
                })
 
-               // Inform false
-
-               return true
+               say += '➡️'
           }
 
-          // Otherwise
+          const workPartCount = this.partsOfType(WORK)
+          const controllerRange = getRange(this.pos.x - room.controller.pos.x, this.pos.y - room.controller.pos.y)
 
-          // If the creep has less energy than its workPartCount
+          if (controllerRange <= 3 && this.store.energy > 0) {
+               if (this.upgradeController(room.controller) === OK) {
+                    this.store.energy -= workPartCount
 
-          if (this.store.energy <= 0) {
-               // Withdraw from the controllerContainer, informing false if the withdraw failed
+                    const controlPoints = workPartCount * UPGRADE_CONTROLLER_POWER
 
-               if (this.withdraw(controllerStructure, RESOURCE_ENERGY) !== OK) return false
-
-               this.store.energy = this.store.getCapacity(RESOURCE_ENERGY)
-
-               // Calculate the control points added
-
-               controlPoints = Math.min(this.store.energy, this.partsOfType(WORK))
-          }
-
-          if (upgradeControllerResult === OK) {
-               // Add control points to total controlPoints counter
-
-               Memory.stats.controlPoints += controlPoints
-               this.say(`🔋${controlPoints}`)
-
-               return true
-          }
-
-          // If the controller is a container and is in need of repair
-
-          if (
-               controllerStructure.structureType === STRUCTURE_CONTAINER &&
-               controllerStructure.hitsMax - controllerStructure.hits >=
-                    workPartCount * REPAIR_POWER * room.creepsFromRoom.controllerUpgrader.length
-          ) {
-               // Try to repair the controllerContainer
-
-               const repairResult = this.repair(controllerStructure)
-
-               // If the repair worked
-
-               if (repairResult === OK) {
-                    // Find the repair amount by finding the smaller of the creep's work and the progress left for the cSite divided by repair power
-
-                    const energySpentOnRepairs = Math.min(
-                         workPartCount,
-                         (controllerStructure.hitsMax - controllerStructure.hits) / REPAIR_POWER,
-                    )
-
-                    // Add control points to total controlPoints counter and say the success
-
-                    Memory.stats.energySpentOnRepairing += energySpentOnRepairs
-                    this.say(`🔧${energySpentOnRepairs * REPAIR_POWER}`)
-
-                    // And inform true
-
-                    return true
+                    Memory.stats.controlPoints += controlPoints
+                    say += `🔋${controlPoints}`
                }
           }
 
-          // Inform true
+          const controllerStructureRange = getRange(
+               this.pos.x - controllerStructure.pos.x,
+               this.pos.y - controllerStructure.pos.y,
+          )
 
+          if (controllerStructureRange <= 3) {
+               // If the controllerStructure is a container and is in need of repair
+
+               if (
+                    this.store.energy > 0 &&
+                    controllerStructure.structureType === STRUCTURE_CONTAINER &&
+                    controllerStructure.hitsMax - controllerStructure.hits >= workPartCount * REPAIR_POWER
+               ) {
+                    // If the repair worked
+
+                    if (this.repair(controllerStructure) === OK) {
+                         // Find the repair amount by finding the smaller of the creep's work and the progress left for the cSite divided by repair power
+
+                         const energySpentOnRepairs = Math.min(
+                              workPartCount,
+                              (controllerStructure.hitsMax - controllerStructure.hits) / REPAIR_POWER,
+                         )
+
+                         this.store.energy -= workPartCount
+
+                         // Add control points to total controlPoints counter and say the success
+
+                         Memory.stats.energySpentOnRepairing += energySpentOnRepairs
+                         say += `🔧${energySpentOnRepairs * REPAIR_POWER}`
+                    }
+               }
+
+               if (controllerStructureRange <= 1 && this.store.energy <= 0) {
+                    // Withdraw from the controllerContainer, informing false if the withdraw failed
+
+                    if (this.withdraw(controllerStructure, RESOURCE_ENERGY) !== OK) return false
+
+                    this.store.energy += Math.min(this.store.getCapacity(), controllerStructure.store.energy)
+                    controllerStructure.store.energy -= this.store.energy
+
+                    say += `⚡`
+               }
+          }
+
+          this.say(say)
           return true
      }
 
@@ -365,12 +333,12 @@ Creep.prototype.advancedUpgradeController = function () {
 
      // If the controller is out of upgrade range
 
-     if (this.pos.getRangeTo(controller.pos) > 3) {
+     if (this.pos.getRangeTo(room.controller.pos) > 3) {
           // Make a move request to it
 
           this.createMoveRequest({
                origin: this.pos,
-               goal: { pos: controller.pos, range: 3 },
+               goal: { pos: room.controller.pos, range: 3 },
                avoidEnemyRanges: true,
                weightGamebjects: {
                     1: room.get('road'),
@@ -384,7 +352,7 @@ Creep.prototype.advancedUpgradeController = function () {
 
      // Try to upgrade the controller, and if it worked
 
-     if (this.upgradeController(controller) === OK) {
+     if (this.upgradeController(room.controller) === OK) {
           // Calculate the control points added
 
           const controlPoints = this.partsOfType(WORK)
@@ -1700,10 +1668,10 @@ Creep.prototype.isOnExit = function () {
      return false
 }
 
-Creep.prototype.findHealPower = function () {
+Creep.prototype.findHealPower = function (range) {
      // Initialize the healValue
 
-     let healValue = 0
+     let heal = 0
 
      // Loop through the creep's body
 
@@ -1714,12 +1682,12 @@ Creep.prototype.findHealPower = function () {
 
           // Otherwise increase healValue by heal power * the part's boost
 
-          healValue += HEAL_POWER * BOOSTS[part.type][part.boost][part.type]
+          heal += BOOSTS[part.type][part.boost][part.type] * (range <= 1 ? HEAL_POWER : RANGED_HEAL_POWER)
      }
 
      // Inform healValue
 
-     return healValue
+     return heal
 }
 
 Creep.prototype.advancedRecycle = function () {
@@ -2029,4 +1997,12 @@ Creep.prototype.reservationManager = function () {
      }
 }
 
-Creep.prototype.createReservation = function () {}
+Creep.prototype.createReservation = function (type, targetID, amount, resourceType) {
+
+     this.memory.reservations.push({
+          type,
+          targetID,
+          amount,
+          resourceType
+     })
+}

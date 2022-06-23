@@ -1,7 +1,7 @@
 /**
  * Increment by 1 when a change has been made that will break previous versions of the bot
  */
- export const breakingVersion = 24
+export const breakingVersion = 25
 
 // Settings
 
@@ -163,6 +163,7 @@ constants.creepRoles = [
      'remoteReserver',
      'remoteDefender',
      'remoteCoreAttacker',
+     'remoteDismantler',
      'scout',
      'claimer',
      'vanguard',
@@ -557,6 +558,7 @@ export const remoteNeedsIndex = {
      remoteDefender: 4,
      remoteCoreAttacker: 5,
      remoteBuilder: 6,
+     remoteDismantler: 7,
 }
 
 export const claimRequestNeedsIndex = {
@@ -581,11 +583,14 @@ export const remoteHarvesterRoles: ('source1RemoteHarvester' | 'source2RemoteHar
      'source2RemoteHarvester',
 ]
 
-export const spawnByRoomRemoteRoles: ('source1RemoteHarvester' | 'source2RemoteHarvester' | 'remoteReserver')[] = [
-     'source1RemoteHarvester',
-     'source2RemoteHarvester',
-     'remoteReserver',
-]
+export const spawnByRoomRemoteRoles: (
+     | 'source1RemoteHarvester'
+     | 'source2RemoteHarvester'
+     | 'remoteReserver'
+     | 'remoteDefender'
+     | 'remoteCoreAttacker'
+     | 'remoteDismantler'
+)[] = ['source1RemoteHarvester', 'source2RemoteHarvester', 'remoteReserver', 'remoteDefender', 'remoteCoreAttacker', 'remoteDismantler']
 
 export const builderSpawningWhenStorageThreshold = 40000
 

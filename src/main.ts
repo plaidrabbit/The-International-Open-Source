@@ -7,7 +7,7 @@ import { internationalManager } from 'international/internationalManager'
 import './international/config'
 import './international/tickConfig'
 import './international/creepOrganizer'
-import './international/remoteNeedsManager'
+import './room/remotesManager'
 import './international/internationalTaskManager'
 import './international/constructionSiteManager'
 import './international/mapVisualsManager'
@@ -15,6 +15,7 @@ import './international/endTickManager'
 
 // Room
 
+import './room/remotesManager'
 import { roomManager } from 'room/roomManager'
 import './room/roomGetters'
 
@@ -118,6 +119,7 @@ declare global {
           | 'remoteReserver'
           | 'remoteDefender'
           | 'remoteCoreAttacker'
+          | 'remoteDismantler'
           | 'scout'
           | 'claimer'
           | 'vanguard'
@@ -786,6 +788,8 @@ declare global {
 
           claimRequestManager(): void
 
+          remotesManager(): void
+
           // Market functions
 
           advancedSell(resourceType: ResourceConstant, amount: number): boolean
@@ -1168,7 +1172,7 @@ declare global {
 
           isOnExit(): boolean
 
-          findHealPower(): number
+          findHealPower(range: number): number
 
           advancedRecycle(): void
 
@@ -1188,7 +1192,7 @@ declare global {
 
           reservationManager(): void
 
-          createReservation(): void
+          createReservation(type: Reservations, target: Id<AnyStoreStructure | Creep | Tombstone | Resource>, amount: number, resourceType: ResourceConstant): void
 
           // Getters
 
@@ -1202,6 +1206,18 @@ declare global {
           _reservation: Reservation | false
 
           readonly reservation: Reservation | false
+
+          _parts: Partial<Record<BodyPartConstant, number>>
+
+          readonly parts: Partial<Record<BodyPartConstant, number>>
+
+          _boosts: Partial<Record<MineralBoostConstant, number>>
+
+          readonly boosts: Partial<Record<MineralBoostConstant, number>>
+
+          _towerDamage: number
+
+          readonly towerDamage: number
      }
 
      interface CreepMemory {

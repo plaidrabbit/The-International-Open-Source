@@ -26,11 +26,6 @@ export class InternationalManager {
      creepOrganizer?(): void
 
      /**
-      * Construct remote needs using data collected from the creepOrganizer
-      */
-     remoteNeedsManager?(): void
-
-     /**
       * Deletes or edits international classes
       */
      taskManager?(): void
@@ -183,9 +178,9 @@ export class InternationalManager {
           return (this._myOrdersCount = Object.keys(Game.market.orders).length)
      }
 
-     _claimRequestsByScore: string[]
+     _claimRequestsByScore: (string | undefined)[]
 
-     get claimRequestsByScore() {
+     get claimRequestsByScore(): (string | undefined)[] {
 
           if (this._claimRequestsByScore) return this._claimRequestsByScore
 
@@ -205,7 +200,6 @@ InternationalManager.prototype.run = function () {
      this.config()
      this.tickConfig()
      this.creepOrganizer()
-     this.remoteNeedsManager()
      this.taskManager()
      this.constructionSiteManager()
 
