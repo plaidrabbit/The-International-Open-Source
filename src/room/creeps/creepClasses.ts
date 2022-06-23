@@ -224,6 +224,16 @@ export class Antifa extends Creep {
 creepClasses.antifa = Antifa
 
 export class DepositHarvester extends Creep {
+     /**
+      * Finds a deposit to harvest in
+      */
+     findDeposit?(): boolean
+
+     /**
+      *
+      */
+     travelToDeposit?(): boolean
+     advancedHarvestDeposit?(deposit: Deposit): boolean
      constructor(creepID: Id<Creep>) {
           super(creepID)
      }
