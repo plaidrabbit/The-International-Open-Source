@@ -405,7 +405,6 @@ Creep.prototype.advancedUpgradeController = function () {
 }
 
 Creep.prototype.advancedBuildCSite = function (cSite) {
-
      const { room } = this
 
      // Stop if the cSite is undefined
@@ -470,7 +469,6 @@ Creep.prototype.advancedBuildCSite = function (cSite) {
 }
 
 Creep.prototype.findRampartRepairTarget = function (workPartCount) {
-
      const { room } = this
 
      // Get the repairTarget using the ID in the creep's memory
@@ -515,7 +513,6 @@ Creep.prototype.findRampartRepairTarget = function (workPartCount) {
 }
 
 Creep.prototype.findRepairTarget = function (excludedIDs = new Set()) {
-
      const { room } = this
 
      // Get roads and containers in the room
@@ -548,7 +545,6 @@ Creep.prototype.findRepairTarget = function (excludedIDs = new Set()) {
 }
 
 Creep.prototype.findOptimalSourceName = function () {
-
      const { room } = this
 
      this.say('FOSN')
@@ -608,7 +604,6 @@ Creep.prototype.findOptimalSourceName = function () {
 }
 
 Creep.prototype.findSourceHarvestPos = function (sourceName) {
-
      const { room } = this
 
      this.say('FSHP')
@@ -665,7 +660,6 @@ Creep.prototype.findSourceHarvestPos = function (sourceName) {
 }
 
 Creep.prototype.findMineralHarvestPos = function () {
-
      const { room } = this
 
      this.say('FMHP')
@@ -721,8 +715,63 @@ Creep.prototype.findMineralHarvestPos = function () {
      return true
 }
 
-Creep.prototype.findFastFillerPos = function () {
+Creep.prototype.findDepositHarvestPos = function () {
+     const { room } = this
 
+     this.say('FDHP')
+
+     // Stop if the creep already has a packedHarvestPos
+
+     if (this.memory.packedPos) return true
+
+     // Define an anchor
+
+     const anchor: RoomPosition = room.anchor || this.pos
+
+     // Get usedDepositHarvestPositions
+
+     const usedHarvestPositions: Set<number> = room.get('usedDepositHarvestPositions')
+
+     const closestHarvestPos: RoomPosition = room.get('closestDepositHarvestPos')
+     let packedPos = pack(closestHarvestPos)
+
+     // If the closestHarvestPos exists and isn't being used
+
+     if (closestHarvestPos) {
+          packedPos = pack(closestHarvestPos)
+
+          // If the position is unused
+
+          if (!usedHarvestPositions.has(packedPos)) {
+               // Assign it as the creep's harvest pos and inform true
+
+               this.memory.packedPos = packedPos
+               usedHarvestPositions.add(packedPos)
+
+               return true
+          }
+     }
+
+     // Otherwise get the harvest positions for the deposit
+
+     const harvestPositions: Pos[] = room.get('depositHarvestPositions')
+
+     const openHarvestPositions = harvestPositions.filter(pos => !usedHarvestPositions.has(pack(pos)))
+     if (!openHarvestPositions.length) return false
+
+     openHarvestPositions.sort(
+          (a, b) => getRangeBetween(anchor.x, anchor.y, a.x, a.y) - getRangeBetween(anchor.x, anchor.y, b.x, b.y),
+     )
+
+     packedPos = pack(openHarvestPositions[0])
+
+     this.memory.packedPos = packedPos
+     usedHarvestPositions.add(packedPos)
+
+     return true
+}
+
+Creep.prototype.findFastFillerPos = function () {
      const { room } = this
 
      this.say('FFP')
@@ -744,8 +793,7 @@ Creep.prototype.findFastFillerPos = function () {
 
      openFastFillerPositions.sort(
           (a, b) =>
-               getRangeBetween(this.pos.x, this.pos.y, a.x, a.y) -
-               getRangeBetween(this.pos.x, this.pos.y, b.x, b.y),
+               getRangeBetween(this.pos.x, this.pos.y, a.x, a.y) - getRangeBetween(this.pos.x, this.pos.y, b.x, b.y),
      )
 
      const packedPos = pack(openFastFillerPositions[0])
@@ -757,7 +805,6 @@ Creep.prototype.findFastFillerPos = function () {
 }
 
 Creep.prototype.hasPartsOfTypes = function (partTypes) {
-
      // If the doesn't have any parts of the specified types, inform false
 
      if (!this.body.some(part => partTypes.includes(part.type))) return false
@@ -768,14 +815,12 @@ Creep.prototype.hasPartsOfTypes = function (partTypes) {
 }
 
 Creep.prototype.partsOfType = function (type) {
-
      // Filter body parts that are of a specified type, informing their count
 
      return this.body.filter(part => part.type === type).length
 }
 
 Creep.prototype.needsNewPath = function (goalPos, cacheAmount, path) {
-
      // Inform true if there is no path
 
      if (!path) return true
@@ -812,7 +857,6 @@ Creep.prototype.needsNewPath = function (goalPos, cacheAmount, path) {
 }
 
 Creep.prototype.createMoveRequest = function (opts) {
-
      const { room } = this
 
      // If creep can't move, inform false
@@ -1097,8 +1141,7 @@ Creep.prototype.findTask = function (allowedTaskTypes, resourceType = RESOURCE_E
 }
 
 Creep.prototype.shove = function (shoverPos) {
-
-     const {room} = this
+     const { room } = this
 
      /*
     if (!this.moveRequest) {
@@ -1134,9 +1177,10 @@ Creep.prototype.shove = function (shoverPos) {
         return false
 
  */
-     if (Memory.roomVisuals) room.visual.line(this.pos, unpackAsRoomPos(this.moveRequest, this.room.name), {
-          color: constants.colors.yellow,
-     })
+     if (Memory.roomVisuals)
+          room.visual.line(this.pos, unpackAsRoomPos(this.moveRequest, this.room.name), {
+               color: constants.colors.yellow,
+          })
 
      this.recurseMoveRequest(this.moveRequest)
 
@@ -1177,7 +1221,6 @@ Creep.prototype.runMoveRequest = function (packedPos) {
 }
 
 Creep.prototype.recurseMoveRequest = function (packedPos, queue = []) {
-
      const { room } = this
 
      // Try to find the name of the creep at pos
@@ -1317,7 +1360,6 @@ Creep.prototype.getPushed = function () {
 }
 
 Creep.prototype.needsResources = function () {
-
      // If the creep is empty
 
      if (this.store.getUsedCapacity() === 0) {
@@ -1342,7 +1384,6 @@ Creep.prototype.needsResources = function () {
 }
 
 Creep.prototype.fulfillTask = function () {
-
      const { room } = this
 
      this.say('FT')

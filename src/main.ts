@@ -174,6 +174,11 @@ declare global {
           | 'myDamagedCreeps'
           | 'damagedAllyCreeps'
           | 'remoteNamesByEfficacy'
+          | 'depositNamesByEfficacy'
+          | 'deposit'
+          | 'usedDepositHarvestPositions'
+          | 'closestDepositHarvestPos'
+          | 'depositHarvestPositions'
 
      interface PathGoal {
           pos: RoomPosition
@@ -387,6 +392,8 @@ declare global {
           energyHarvested: number
 
           mineralsHarvested: number
+
+          depositsHarvested: number
 
           controlPoints: number
 
@@ -1078,6 +1085,7 @@ declare global {
           findSourceHarvestPos(sourceName: 'source1' | 'source2'): boolean
 
           findMineralHarvestPos(): boolean
+          findDepositHarvestPos(): boolean
 
           findFastFillerPos(): boolean
 
@@ -1252,6 +1260,11 @@ declare global {
            * The name of the room the creep is remoting for
            */
           remoteName: string
+
+          /**
+           * The name of the room the creep is deposit harvesting for
+           */
+          depositName: string
 
           /**
            * The type of task the creep has been assigned
