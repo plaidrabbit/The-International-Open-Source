@@ -1,0 +1,7 @@
+/.VSCodeCounter
+tmp-test-server
+
+node_modules
+screeps.json
+.env
+.vs

@@ -1,8 +1,8 @@
 {
-    "name": "the-international-screeps-bot",
-    "version": "3.0.0",
+    "name": "@the-international-screeps-bot/the-international-open-source",
+    "version": "1.0.1",
     "description": "",
-    "main": "src/main.ts",
+    "main": "dist/main.js",
     "scripts": {
         "build": "rollup -c",
         "lint": "eslint **/*",
@@ -22,14 +22,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/CarsonBurke/The-International-Screeps-Bot.git"
+        "url": "https://github.com/The-International-Screeps-Bot/The-International-Open-Source.git"
     },
     "author": "",
     "license": "Unlicense",
     "bugs": {
-        "url": "https://github.com/CarsonBurke/The-International-Screeps-Bot/issues"
+        "url": "https://github.com/The-International-Screeps-Bot/The-International-Open-Source.git/issues"
     },
-    "homepage": "https://github.com/CarsonBurke/The-International-Screeps-Bot#readme",
+    "homepage": "https://github.com/The-International-Screeps-Bot/The-International-Open-Source.git#readme",
     "devDependencies": {
         "@rollup/plugin-commonjs": "^20.0.0",
         "@rollup/plugin-node-resolve": "^13.0.4",
@@ -67,5 +67,6 @@
     },
     "dependencies": {
         "source-map": "~0.6.1"
-    }
+    },
+    "screeps_mod": true
 }
