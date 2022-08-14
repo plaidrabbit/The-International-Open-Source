@@ -100,6 +100,7 @@ export class InternationalManager {
         let bestOrder: Order
 
         for (const order of orders) {
+
             if (order.price <= minPrice) continue
 
             if (order.price > (bestOrder ? bestOrder.price : 0)) bestOrder = order
@@ -211,7 +212,7 @@ export class InternationalManager {
 
             // If the order is inactive (it likely has 0 remaining amount)
 
-            if (order.remainingAmount == 0) continue
+            if (!order.active) continue
 
             // If there is foundation for this structure, create it
 
